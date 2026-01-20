@@ -7,7 +7,7 @@ pipeline {
         PROXY_FOR_TOOLS = credentials('proxy-settings')
         NO_PROXY_LIST = 'localhost,127.0.0.1,.local,.internal,192.168.100.0/24'
         
-        // NVD-key
+        // NVD-key - if you do not have it, just comment the string below and comment / remove usage of the "NVD_API_KEY" variable from the script (OWASP Dependency Check section)
         NVD_API_KEY = credentials('NVD-key')
         
         // Network settings
