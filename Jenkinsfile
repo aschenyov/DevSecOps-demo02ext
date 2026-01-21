@@ -447,7 +447,6 @@ pipeline {
                             -e COSIGN_PASSWORD \
                             gcr.io/projectsigstore/cosign:latest \
                             sign --key env://COSIGN_PRIVATE_KEY \
-                                 --local \
                                  --yes \
                                  ${imageRef}
                         
