@@ -443,7 +443,7 @@ pipeline {
                             gcr.io/projectsigstore/cosign:v2.2.4 \
                             sign --key env://COSIGN_PRIVATE_KEY \
                                  --yes \
-                                 '"${REGISTRY_TAG}"'
+                                 '"\${REGISTRY_TAG}"'
                         
                         echo "✅ Image signed successfully!"
                     '''
