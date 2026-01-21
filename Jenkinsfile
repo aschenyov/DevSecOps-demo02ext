@@ -410,53 +410,7 @@ pipeline {
             }
         }
         
-        // Step 3.3: Sign Docker Image
-        stage('Sign Docker Image') {
-            steps {
-                echo "Signing Docker image with Cosign using private key from Vault..."
-                script {
-                    
-                    def imageRef = env.BUILD_TAG
-                    
-                    withCredentials([string(credentialsId: 'cosign-key-password', variable: 'COSIGN_KEY_PWD')])
-                    
-                    {
-                    // Fetching private key from Vault and passing to cosign with env variable
-                    sh """
-                        echo 'Signing image: ${imageRef}'
-                        
-                        echo 'Fetching Cosign private key from Vault and signing image...'
-                        
-                        export COSIGN_PRIVATE_KEY=\$(curl -s \
-                            --header 'X-Vault-Token: ${VAULT_TOKEN}' \
-                            ${VAULT_ADDR}/v1/secret/data/docker-signing/cosign-private \
-                            | jq -r .data.data.key)
-                
-                        if [ -z '\$COSIGN_PRIVATE_KEY' ]; then
-                            echo '❌ Failed to fetch private key from Vault'
-                            exit 1
-                        fi
-                
-                        export COSIGN_PASSWORD=\${COSIGN_KEY_PWD}
-                
-                        docker run --rm \
-                            -v /var/run/docker.sock:/var/run/docker.sock \
-                            -e COSIGN_PRIVATE_KEY \
-                            -e COSIGN_PASSWORD \
-                            gcr.io/projectsigstore/cosign:latest \
-                            sign --key env://COSIGN_PRIVATE_KEY \
-                                 --allow-insecure-registry \
-                                 --yes \
-                                 ${imageRef}
-                        
-                        echo '✅ Image signed successfully!'
-                    """
-                    }
-                }
-            }
-        }
-        
-        // Step 3.4: Tagging Docker image
+        // Step 3.3: Tagging Docker image
         stage('Tag Docker Image') {
             steps {
                 script {
@@ -494,6 +448,63 @@ pipeline {
                         curl -s http://${REGISTRY_HOST}/v2/${APP_NAME}/tags/list | jq . 2>/dev/null || \
                         curl -s http://${REGISTRY_HOST}/v2/${APP_NAME}/tags/list
                     """
+                }
+            }
+        }
+        
+        // Step 4.1: Sign Docker Images
+        stage('Sign Docker Images') {
+            steps {
+                echo "Signing Docker images with Cosign using private key from Vault..."
+                script {
+                    
+                    def imageRef = env.REGISTRY_TAG
+                    def imageRef_latest = env.REGISTRY_LATEST
+                    
+                    withCredentials([string(credentialsId: 'cosign-key-password', variable: 'COSIGN_KEY_PWD')])
+                    
+                    {
+                    // Fetching private key from Vault and passing to cosign with env variable
+                    sh """
+                        echo 'Signing images: ${imageRef}, ${imageRef_latest}'
+                        
+                        echo 'Fetching Cosign private key from Vault and signing image...'
+                        
+                        export COSIGN_PRIVATE_KEY=\$(curl -s \
+                            --header 'X-Vault-Token: ${VAULT_TOKEN}' \
+                            ${VAULT_ADDR}/v1/secret/data/docker-signing/cosign-private \
+                            | jq -r .data.data.key)
+                
+                        if [ -z '\$COSIGN_PRIVATE_KEY' ]; then
+                            echo '❌ Failed to fetch private key from Vault'
+                            exit 1
+                        fi
+                
+                        export COSIGN_PASSWORD=\${COSIGN_KEY_PWD}
+                
+                        docker run --rm \
+                            -v /var/run/docker.sock:/var/run/docker.sock \
+                            -e COSIGN_PRIVATE_KEY \
+                            -e COSIGN_PASSWORD \
+                            gcr.io/projectsigstore/cosign:latest \
+                            sign --key env://COSIGN_PRIVATE_KEY \
+                                 --allow-insecure-registry \
+                                 --yes \
+                                 ${imageRef}
+                        
+                        docker run --rm \
+                            -v /var/run/docker.sock:/var/run/docker.sock \
+                            -e COSIGN_PRIVATE_KEY \
+                            -e COSIGN_PASSWORD \
+                            gcr.io/projectsigstore/cosign:latest \
+                            sign --key env://COSIGN_PRIVATE_KEY \
+                                 --allow-insecure-registry \
+                                 --yes \
+                                 ${imageRef_latest}
+                        
+                        echo '✅ Images signed successfully!'
+                    """
+                    }
                 }
             }
         }
