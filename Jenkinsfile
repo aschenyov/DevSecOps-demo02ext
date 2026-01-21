@@ -476,11 +476,15 @@ pipeline {
                         
                         echo 'Fetching Cosign private key from Vault and signing image...'
                         
+                        set +x
+                        
                         export COSIGN_PRIVATE_KEY=\$(curl -s \
                             --header 'X-Vault-Token: ${VAULT_TOKEN}' \
                             ${VAULT_ADDR}/v1/secret/data/docker-signing/cosign-private \
                             | jq -r .data.data.key)
-                
+                        
+                        set -x
+                        
                         if [ -z '\$COSIGN_PRIVATE_KEY' ]; then
                             echo '❌ Failed to fetch private key from Vault'
                             exit 1
