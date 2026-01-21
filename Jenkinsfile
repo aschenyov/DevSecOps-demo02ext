@@ -418,6 +418,9 @@ pipeline {
                     
                     def imageRef = env.BUILD_TAG
                     
+                    withCredentials([string(credentialsId: 'cosign-key-password', variable: 'COSIGN_KEY_PWD')])
+                    
+                    {
                     // Fetching private key from Vault and passing to cosign with env variable
                     sh """
                         echo 'Signing image: ${imageRef}'
@@ -434,7 +437,7 @@ pipeline {
                             exit 1
                         fi
                 
-                        export COSIGN_PASSWORD=${credentials('cosign-key-password')}
+                        export COSIGN_PASSWORD=\${COSIGN_KEY_PWD}
                 
                         docker run --rm \
                             -v /var/run/docker.sock:/var/run/docker.sock \
@@ -442,11 +445,13 @@ pipeline {
                             -e COSIGN_PASSWORD \
                             gcr.io/projectsigstore/cosign:latest \
                             sign --key env://COSIGN_PRIVATE_KEY \
+                                 --allow-insecure-registry \
                                  --yes \
                                  ${imageRef}
                         
                         echo '✅ Image signed successfully!'
                     """
+                    }
                 }
             }
         }
