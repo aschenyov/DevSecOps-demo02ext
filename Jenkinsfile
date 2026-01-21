@@ -424,7 +424,7 @@ pipeline {
                     def imageRef = env.REGISTRY_TAG
                     
                     // Fetching private key from Vault and passing to cosign with env variable
-                    sh '''
+                    sh """
                         echo "Signing image: ${imageRef}"
                         
                         echo "Fetching Cosign private key from Vault and signing image..."
@@ -451,7 +451,7 @@ pipeline {
                                  ${imageRef}
                         
                         echo "✅ Image signed successfully!"
-                    '''
+                    """
                 }
             }
         }
