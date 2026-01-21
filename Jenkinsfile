@@ -216,20 +216,14 @@ pipeline {
             }
         }
         
-        // Step 3: Creating Docker image and tagging
+        // Step 3.1: Creating Docker image and tagging
         stage('Build & Tag Docker Image') {
             steps {
                 script {
                     echo "Build Docker image..."
                     
                     // Build and tag
-                    docker.build("${REGISTRY_TAG}")
-                    
-                    // Creating the "latest" tag
-                    sh "docker tag ${REGISTRY_TAG} ${REGISTRY_LATEST}"
-                    
-                    // Creating the local tag reference
-                    sh "docker tag ${REGISTRY_TAG} ${BUILD_TAG}"
+                    docker.build("${BUILD_TAG}")
                     
                     echo "Created images:"
                     sh "docker images | grep ${APP_NAME}"
@@ -237,7 +231,7 @@ pipeline {
             }
         }
         
-        // Security Step: Container Image Scanning with Trivy
+        // Security Step 3.2: Container Image Scanning with Trivy
         stage('Container Scan: Trivy Analysis') {
             steps {
                 echo "Running Trivy container image scan..."
@@ -416,12 +410,13 @@ pipeline {
             }
         }
         
+        // Step 3.3: Sign Docker Image
         stage('Sign Docker Image') {
             steps {
                 echo "Signing Docker image with Cosign using private key from Vault..."
                 script {
                     
-                    def imageRef = env.REGISTRY_TAG
+                    def imageRef = env.BUILD_TAG
                     
                     // Fetching private key from Vault and passing to cosign with env variable
                     sh """
@@ -448,7 +443,7 @@ pipeline {
                             gcr.io/projectsigstore/cosign:latest \
                             sign --key env://COSIGN_PRIVATE_KEY \
                                  --yes \
-                                 'docker://${imageRef}'
+                                 ${imageRef}
                         
                         echo '✅ Image signed successfully!'
                     """
@@ -456,6 +451,23 @@ pipeline {
             }
         }
         
+        // Step 3.4: Tagging Docker image
+        stage('Tag Docker Image') {
+            steps {
+                script {
+                    
+                    // Creating the registry tag reference
+                    sh "docker tag ${BUILD_TAG} ${REGISTRY_TAG}"
+                    
+                    // Creating the "latest" tag
+                    sh "docker tag ${BUILD_TAG} ${REGISTRY_LATEST}"
+                    
+                    echo "Created and tagged images:"
+                    sh "docker images | grep ${APP_NAME}"
+                }
+            }
+        }
+		
         // Step 4: Pushing to local Registry (.193)
         stage('Push to Registry') {
             steps {
