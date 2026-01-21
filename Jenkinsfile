@@ -16,6 +16,7 @@ pipeline {
         
         // Cosign
         COSIGN_PUBLIC_KEY = credentials('cosign-public-key')
+        COSIGN_KEY_PASSWORD = credentials('cosign-key-password')
         
         // Network settings
         REGISTRY_HOST = '192.168.100.193:5000'
@@ -433,10 +434,12 @@ pipeline {
                             exit 1
                         fi
                 
+                        export COSIGN_PASSWORD=$COSIGN_KEY_PASSWORD
+                
                         docker run --rm \
                             -v /var/run/docker.sock:/var/run/docker.sock \
                             -e COSIGN_PRIVATE_KEY \
-                            -e COSIGN_PASSWORD= \
+                            -e COSIGN_PASSWORD \
                             gcr.io/projectsigstore/cosign:v2.2.4 \
                             sign --key env://COSIGN_PRIVATE_KEY \
                                  --yes \
