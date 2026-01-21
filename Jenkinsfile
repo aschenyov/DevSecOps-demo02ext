@@ -10,6 +10,13 @@ pipeline {
         // NVD-key - if you do not have it, just comment the string below and comment / remove usage of the "NVD_API_KEY" variable from the script (OWASP Dependency Check section)
         NVD_API_KEY = credentials('NVD-key')
         
+        // Vault settings
+        VAULT_ADDR = 'http://192.168.100.192:8200'
+        VAULT_TOKEN = 'test-only-token'  // Demo purpose only! In prod - AppRole, JWT and so on
+        
+        // Cosign
+        COSIGN_PUBLIC_KEY = credentials('cosign-public-key')
+        
         // Network settings
         REGISTRY_HOST = '192.168.100.193:5000'
         APP_NAME = 'vulnerable-app'
@@ -404,6 +411,39 @@ pipeline {
                         
                         input 'Trivy scan encountered an error. Continue with deployment?'
                     }
+                }
+            }
+        }
+        
+        stage('Sign Docker Image') {
+            steps {
+                echo "Signing Docker image with Cosign using private key from Vault..."
+                script {
+                    // Fetching private key from Vault and passing to cosign with env variable
+                    sh '''
+                        echo "Fetching Cosign private key from Vault and signing image..."
+                
+                        export COSIGN_PRIVATE_KEY=$(curl -s \
+                            --header "X-Vault-Token: ${VAULT_TOKEN}" \
+                            ${VAULT_ADDR}/v1/secret/data/docker-signing/cosign-private \
+                            | jq -r .data.data.key)
+                
+                        if [ -z "$COSIGN_PRIVATE_KEY" ]; then
+                            echo "❌ Failed to fetch private key from Vault"
+                            exit 1
+                        fi
+                
+                        docker run --rm \
+                            -v /var/run/docker.sock:/var/run/docker.sock \
+                            -e COSIGN_PRIVATE_KEY \
+                            -e COSIGN_PASSWORD= \
+                            gcr.io/projectsigstore/cosign:v2.2.4 \
+                            sign --key env://COSIGN_PRIVATE_KEY \
+                                 --yes \
+                                 '"${REGISTRY_TAG}"'
+                        
+                        echo "✅ Image signed successfully!"
+                    '''
                 }
             }
         }
