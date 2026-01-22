@@ -550,15 +550,10 @@ pipeline {
                         sh """
                             echo "Attempting to verify image signature..."
                             
-                            echo "\${COSIGN_PUBLIC_KEY}" > /tmp/cosign-pubkey.pub
-                            
                             echo "Creating public key file..."
                             
                             rm -f /tmp/cosign-pubkey.pub 2>/dev/null || true
-                            
-                                cat << 'COSIGN_KEY_EOF' > /tmp/cosign-pubkey.pub
-                            ''' + env.COSIGN_PUBLIC_KEY + '''
-                            COSIGN_KEY_EOF
+                            echo "\${COSIGN_PUBLIC_KEY}" > /tmp/cosign-pubkey.pub
                             
                             less /tmp/cosign-pubkey.pub
                             
