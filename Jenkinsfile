@@ -573,7 +573,7 @@ pipeline {
                             verificationPassed = true
                             echo "✅ Image signature verified successfully!"
                             
-                            # Additional details about the signature
+                            // Additional details about the signature
                             sh """
                                 echo "=== Signature details ==="
                                 docker run --rm \
