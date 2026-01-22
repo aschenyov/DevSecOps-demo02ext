@@ -571,7 +571,7 @@ pipeline {
                             
                             rm -f /tmp/cosign-pubkey.pub
                             
-                            cat /tmp/verification-status.txt
+                            less /tmp/verification-status.txt
                             
                             # Checking the result
                             if [ \${PIPESTATUS[0]} -eq 0 ]; then
