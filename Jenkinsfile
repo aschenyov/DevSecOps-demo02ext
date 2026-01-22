@@ -455,20 +455,17 @@ pipeline {
                 script {
                     
                     def imageRef = env.REGISTRY_TAG
-                    def imageRef_latest = env.REGISTRY_LATEST
                     
                     withCredentials([string(credentialsId: 'cosign-key-password', variable: 'COSIGN_KEY_PWD')])
                     
                     {
                     // Fetching private key from Vault and passing to cosign with env variable
                     sh """
-                        # echo 'Signing images: ${imageRef}, ${imageRef_latest}'
+                        # echo 'Signing image: ${imageRef}'
                         
                         IMAGE_REF_DG=\$(docker inspect --format='{{index .RepoDigests 0}}' ${imageRef} 2>/dev/null || echo "")
-                        IMAGE_REF_DG_LATEST=\$(docker inspect --format='{{index .RepoDigests 0}}' ${imageRef_latest} 2>/dev/null || echo "")
                         
                         echo 'Signing image 1: \$IMAGE_REF_DG'
-                        echo 'Signing image 2: \$IMAGE_REF_DG_LATEST'
                         
                         echo 'Fetching Cosign private key from Vault and signing image...'
                         
@@ -497,18 +494,8 @@ pipeline {
                                  --allow-insecure-registry \
                                  --yes \
                                  \$IMAGE_REF_DG
-                        
-                        docker run --rm \
-                            -v /var/run/docker.sock:/var/run/docker.sock \
-                            -e COSIGN_PRIVATE_KEY \
-                            -e COSIGN_PASSWORD \
-                            gcr.io/projectsigstore/cosign:latest \
-                            sign --key env://COSIGN_PRIVATE_KEY \
-                                 --allow-insecure-registry \
-                                 --yes \
-                                 \$IMAGE_REF_DG_LATEST
-                        
-                        echo '✅ Images signed successfully!'
+                            
+                        echo '✅ Image signed successfully!'
                     """
                     }
                 }
