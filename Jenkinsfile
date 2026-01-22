@@ -14,10 +14,6 @@ pipeline {
         VAULT_ADDR = 'http://192.168.100.192:8200'
         VAULT_TOKEN = 'test-only-token'  // Demo purpose only! In prod - AppRole, JWT and so on
         
-        // Cosign
-        COSIGN_PUBLIC_KEY = credentials('cosign-public-key')
-        // COSIGN_KEY_PASSWORD = credentials('cosign-key-password')
-        
         // Network settings
         REGISTRY_HOST = '192.168.100.193:5000'
         APP_NAME = 'vulnerable-app'
@@ -549,18 +545,15 @@ pipeline {
                     // Checking the signature
                     try {
                         
-                        echo "Creating public key file..."
-                        writeFile file: "${WORKSPACE}/cosign-pubkey.pub", text: env.COSIGN_PUBLIC_KEY
-                        
                         sh """
                             echo "Attempting to verify image signature..."
                             
                             # Checking signature with public key
                             docker run --rm \
                                 -v /var/run/docker.sock:/var/run/docker.sock \
-                                -v "${WORKSPACE}/cosign-pubkey.pub:/cosign-pubkey.pub:ro" \
+                                -v "\$(pwd)/check/cosign.pub:/cosign.pub:ro" \
                                 gcr.io/projectsigstore/cosign:latest \
-                                verify --key /cosign-pubkey.pub \
+                                verify --key /cosign.pub \
                                        --allow-insecure-registry \
                                        ${imageToVerify} 2>&1 | tee /tmp/verification-status.txt
                             
