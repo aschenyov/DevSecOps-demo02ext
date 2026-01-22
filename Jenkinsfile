@@ -567,7 +567,7 @@ pipeline {
                                 gcr.io/projectsigstore/cosign:latest \
                                 verify --key /tmp/cosign-pubkey.pub \
                                        --allow-insecure-registry \
-                                       ${imageToVerify} 2>&1 | tee /tmp/cosign-verify-output.txt
+                                       ${imageToVerify} 2>&1 | tee /tmp/verification-status.txt
                             
                             rm -f /tmp/cosign-pubkey.pub
                             
