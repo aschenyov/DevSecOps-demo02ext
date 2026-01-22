@@ -556,9 +556,9 @@ pipeline {
                             rm -f /tmp/cosign-pubkey.pub 2>/dev/null || true
                             # echo "\${COSIGN_PUBLIC_KEY}" > /tmp/cosign-pubkey.pub
                             
-                            cat << "COSIGN_KEY_EOF" > /tmp/cosign-pubkey.pub
-                            ''' + env.COSIGN_PUBLIC_KEY + '''
-                            COSIGN_KEY_EOF
+                            cat > /tmp/cosign-pubkey.pub << 'COSIGN_KEY_EOF'
+                        ''' + env.COSIGN_PUBLIC_KEY + '''
+                        COSIGN_KEY_EOF
                             
                             less /tmp/cosign-pubkey.pub
                             
