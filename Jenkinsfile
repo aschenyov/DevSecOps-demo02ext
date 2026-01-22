@@ -552,8 +552,6 @@ pipeline {
                             
                             echo "\${COSIGN_PUBLIC_KEY}" > /tmp/cosign-pubkey.pub
                             
-                            rm -f /tmp/cosign-pubkey.pub
-                            
                             # Checking signature with public key
                             docker run --rm \
                                 -v /var/run/docker.sock:/var/run/docker.sock \
@@ -562,6 +560,8 @@ pipeline {
                                 verify --key /tmp/cosign-pubkey.pub \
                                        --allow-insecure-registry \
                                        ${imageToVerify} 2>&1 | tee /tmp/cosign-verify-output.txt
+                            
+                            rm -f /tmp/cosign-pubkey.pub
                             
                             # Checking the result
                             if [ \${PIPESTATUS[0]} -eq 0 ]; then
