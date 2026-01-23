@@ -449,9 +449,9 @@ pipeline {
         }
         
         // Step 4.1: Sign Docker Images
-        stage('Sign Docker Images') {
+        stage('Sign Docker Image') {
             steps {
-                echo "Signing Docker images with Cosign using private key from Vault..."
+                echo "Signing Docker image with Cosign using private key from Vault..."
                 script {
                     
                     def imageRef = env.REGISTRY_TAG
