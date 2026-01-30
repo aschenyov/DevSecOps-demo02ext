@@ -63,9 +63,6 @@ pipeline {
                             # Scanning source code (./src folder only)
                             docker run --rm -v "$(pwd)/src:/src:ro" \\
                                             -v "$(pwd):/results" \\
-                               # -e HTTP_PROXY="${PROXY_FOR_TOOLS}" \\
-                               # -e HTTPS_PROXY="${PROXY_FOR_TOOLS}" \\
-                               # -e NO_PROXY="${NO_PROXY_LIST}" \\
                                 semgrep/semgrep:latest \\
                                 semgrep scan \\
                                 --config=auto \\
@@ -76,9 +73,6 @@ pipeline {
                             # Scanning source code (./src folder only) - to create a human-readable output
                             docker run --rm -v "$(pwd)/src:/src:ro" \\
                                             -v "$(pwd):/results" \\
-                                # -e HTTP_PROXY="${PROXY_FOR_TOOLS}" \\
-                                # -e HTTPS_PROXY="${PROXY_FOR_TOOLS}" \\
-                                # -e NO_PROXY="${NO_PROXY_LIST}" \\
                                 returntocorp/semgrep:latest \\
                                 semgrep scan \\
                                 --config=auto \\
