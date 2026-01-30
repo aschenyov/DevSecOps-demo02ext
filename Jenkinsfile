@@ -20,7 +20,7 @@ pipeline {
         MYSQL_IMAGE = "${REGISTRY_HOST}/mysql:5.7"
         
         // Project settings
-        GIT_REPO = 'https://github.com/trainer04/DevSecOps-demo02ext.git'
+        GIT_REPO = 'https://github.com/aschenyov/DevSecOps-demo02ext.git'
         
         // Docker tags
         BUILD_TAG = "${APP_NAME}:${BUILD_NUMBER}"
