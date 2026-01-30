@@ -12,7 +12,7 @@ pipeline {
         
         // Vault settings
         VAULT_ADDR = 'http://10.129.0.10:8200'
-        VAULT_TOKEN = 'test-only-token'  // Demo purpose only! In prod - AppRole, JWT and so on
+        VAULT_TOKEN = 'testonly-token'  // Demo purpose only! In prod - AppRole, JWT and so on
         
         // Network settings
         REGISTRY_HOST = '10.129.0.36:5000'
